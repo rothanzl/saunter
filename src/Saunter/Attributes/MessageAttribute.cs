@@ -20,6 +20,16 @@ namespace Saunter.Attributes
         /// The type to use to generate the message payload schema.
         /// </summary>
         public Type PayloadType { get; }
+        
+        /// <summary>
+        /// The type to use to generate the message headers schema.
+        /// </summary>
+        public Type HeadersType { get; set; }
+        
+        /// <summary>
+        /// Type implemented IExamplesProvider interface
+        /// </summary>
+        public Type ExamplesSource { get; set; }
 
         /// <summary>
         /// A machine-friendly name for the message.

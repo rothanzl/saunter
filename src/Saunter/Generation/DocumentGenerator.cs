@@ -261,6 +261,21 @@ namespace Saunter.Generation
             return messages;
         }
 
+        
+        private static MessageExample[] GenerateExamples(MessageAttribute messageAttribute)
+        {
+            if (messageAttribute.ExamplesSource == null)
+                return Array.Empty<MessageExample>();
+            
+            var instance = Activator.CreateInstance(messageAttribute.ExamplesSource) as IExamplesProvider;
+
+            if(instance == null)
+                return Array.Empty<MessageExample>();
+
+
+            return instance.GetExamples();
+        }
+        
         private static IMessage GenerateMessageFromAttribute(MessageAttribute messageAttribute, AsyncApiSchemaResolver schemaResolver, JsonSchemaGenerator jsonSchemaGenerator)
         {
             if (messageAttribute?.PayloadType == null)
@@ -272,6 +287,8 @@ namespace Saunter.Generation
             {
                 MessageId = messageAttribute.MessageId,
                 Payload = jsonSchemaGenerator.Generate(messageAttribute.PayloadType, schemaResolver),
+                Headers = messageAttribute.HeadersType != null ? jsonSchemaGenerator.Generate(messageAttribute.HeadersType, schemaResolver) : null,
+                Examples = GenerateExamples(messageAttribute),
                 Title = messageAttribute.Title,
                 Summary = messageAttribute.Summary,
                 Description = messageAttribute.Description,
