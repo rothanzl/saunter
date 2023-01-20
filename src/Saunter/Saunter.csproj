@@ -3,16 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <IsPackable>true</IsPackable>
-    <PackageId>Saunter</PackageId>
-    <Title>Saunter</Title>
+    <PackageId>Rothanzl.SaunterFork</PackageId>
+    <Title>Rothanzl.SaunterFork</Title>
+    <Version>0.0.1</Version>
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Authors>tehmantra</Authors>
+    <Authors>tehmantra,Rothanzl</Authors>
     <Description>Code-first AsyncAPI documentation</Description>
     <PackageTags>asyncapi;aspnetcore;openapi;documentation;amqp</PackageTags>
-    <RepositoryUrl>https://github.com/tehmantra/saunter</RepositoryUrl>
+    <RepositoryUrl>https://github.com/rothanzl/saunter</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageProjectUrl>https://github.com/tehmantra/saunter</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <IncludeSymbols>true</IncludeSymbols>
