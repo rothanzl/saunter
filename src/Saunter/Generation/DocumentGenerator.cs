@@ -20,14 +20,20 @@ namespace Saunter.Generation
         {
         }
 
-        public AsyncApiSchema.v2.AsyncApiDocument GenerateDocument(TypeInfo[] asyncApiTypes, AsyncApiOptions options, AsyncApiDocument prototype, IServiceProvider serviceProvider)
+        public AsyncApiSchema.v2.AsyncApiDocument GenerateDocument(TypeInfo[] asyncApiTypes, AsyncApiOptions options, AsyncApiSchemaOptions schemaOptions, AsyncApiDocument prototype, IServiceProvider serviceProvider)
         {
             var asyncApiSchema = prototype.Clone();
 
-            var schemaResolver = new AsyncApiSchemaResolver(asyncApiSchema, options.SchemaOptions);
+            var schemaResolver = new AsyncApiSchemaResolver(asyncApiSchema, schemaOptions);
 
-            var generator = new JsonSchemaGenerator(options.SchemaOptions);
-            asyncApiSchema.Channels = GenerateChannels(asyncApiTypes, schemaResolver, options, generator, serviceProvider);
+            var generator = new JsonSchemaGenerator(schemaOptions);
+            
+            foreach (KeyValuePair<string,ChannelItem> ch in GenerateChannels(asyncApiTypes, schemaResolver, options, generator, serviceProvider))
+            {
+                asyncApiSchema.Channels.TryAdd(ch.Key, ch.Value);
+            }
+            
+            
             
             var filterContext = new DocumentFilterContext(asyncApiTypes, schemaResolver, generator);
             foreach (var filterType in options.DocumentFilters)
@@ -71,17 +77,19 @@ namespace Saunter.Generation
             foreach (var mc in methodsWithChannelAttribute)
             {
                 if (mc.Channel == null) continue;
+
+                var provider = mc.Channel.CreateSourceProvider();
                 
                 var channelItem = new ChannelItem
                 {
-                    Description = mc.Channel.Description,
+                    Description = provider.Description,
                     Parameters = GetChannelParametersFromAttributes(mc.Method, schemaResolver, jsonSchemaGenerator),
                     Publish = GenerateOperationFromMethod(mc.Method, schemaResolver, OperationType.Publish, options, jsonSchemaGenerator, serviceProvider),
                     Subscribe = GenerateOperationFromMethod(mc.Method, schemaResolver, OperationType.Subscribe, options, jsonSchemaGenerator, serviceProvider),
-                    Bindings = mc.Channel.BindingsRef != null ? new ChannelBindingsReference(mc.Channel.BindingsRef) : null,
-                    Servers = mc.Channel.Servers?.ToList(),
+                    Bindings = provider.BindingsRef != null ? new ChannelBindingsReference(provider.BindingsRef) : null,
+                    Servers = provider.Servers?.ToList(),
                 }; 
-                channels.AddOrAppend(mc.Channel.Name, channelItem);
+                channels.AddOrAppend(provider.Name, channelItem);
                 
                 var context = new ChannelItemFilterContext(mc.Method, schemaResolver, jsonSchemaGenerator, mc.Channel);
                 foreach (var filterType in options.ChannelItemFilters)
@@ -113,18 +121,20 @@ namespace Saunter.Generation
             foreach (var cc in classesWithChannelAttribute)
             {
                 if (cc.Channel == null) continue;
+
+                var provider = cc.Channel.CreateSourceProvider();
                 
                 var channelItem = new ChannelItem
                 {
-                    Description = cc.Channel.Description,
+                    Description = provider.Description,
                     Parameters = GetChannelParametersFromAttributes(cc.Type, schemaResolver, jsonSchemaGenerator),
                     Publish = GenerateOperationFromClass(cc.Type, schemaResolver, OperationType.Publish, jsonSchemaGenerator),
                     Subscribe = GenerateOperationFromClass(cc.Type, schemaResolver, OperationType.Subscribe, jsonSchemaGenerator),
-                    Bindings = cc.Channel.BindingsRef != null ? new ChannelBindingsReference(cc.Channel.BindingsRef) : null,
-                    Servers = cc.Channel.Servers?.ToList(),
+                    Bindings = provider.BindingsRef != null ? new ChannelBindingsReference(provider.BindingsRef) : null,
+                    Servers = provider.Servers?.ToList(),
                 };
                 
-                channels.AddOrAppend(cc.Channel.Name, channelItem);
+                channels.AddOrAppend(provider.Name, channelItem);
                 
                 var context = new ChannelItemFilterContext(cc.Type, schemaResolver, jsonSchemaGenerator, cc.Channel);
                 foreach (var filterType in options.ChannelItemFilters)

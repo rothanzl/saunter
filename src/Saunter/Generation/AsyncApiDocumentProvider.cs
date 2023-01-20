@@ -17,7 +17,7 @@ namespace Saunter.Generation
             _serviceProvider = serviceProvider;
         }
 
-        public AsyncApiDocument GetDocument(AsyncApiOptions options, AsyncApiDocument prototype)
+        public AsyncApiDocument GetDocument(AsyncApiOptions options, AsyncApiSchemaOptions schemaOptions, AsyncApiDocument prototype)
         {
             if (options == null)
             {
@@ -25,7 +25,7 @@ namespace Saunter.Generation
             }
             var asyncApiTypes = GetAsyncApiTypes(options, prototype);
 
-            var document = _documentGenerator.GenerateDocument(asyncApiTypes, options, prototype, _serviceProvider);
+            var document = _documentGenerator.GenerateDocument(asyncApiTypes, options, schemaOptions, prototype, _serviceProvider);
 
             return document;
         }

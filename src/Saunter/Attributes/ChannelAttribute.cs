@@ -1,40 +1,30 @@
 using System;
+using System.Linq;
 
 namespace Saunter.Attributes
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class ChannelAttribute : Attribute
     {
-        /// <summary>
-        /// The name of the channel. 
-        /// Format depends on the underlying messaging protocol's conventions.
-        /// For example, amqp uses dot-separated paths 'light.measured'.
-        /// </summary>
-        public string Name { get; }
+        private Type ChannelSourceProvider { get; }
 
-        /// <summary>
-        /// An optional description of this channel item.
-        /// CommonMark syntax can be used for rich text representation.
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// The name of a channel bindings item to reference.
-        /// The bindings must be added to components/channelBindings with the same name.
-        /// </summary>
-        public string BindingsRef { get; set; }
-
-        /// <summary>
-        /// The servers on which this channel is available, specified as an optional unordered
-        /// list of names (string keys) of Server Objects defined in the Servers Object (a map).
-        /// If servers is absent or empty then this channel must be available on all servers
-        /// defined in the Servers Object.
-        /// </summary>
-        public string[] Servers { get; set; }
-
-        public ChannelAttribute(string name)
+        public ChannelAttribute(Type channelSourceProvider)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            if (channelSourceProvider.GetInterface(nameof(IChannelSourceProvider)) is null)
+                throw new ArgumentException($"Type {channelSourceProvider.FullName ?? channelSourceProvider.Name} must implement {nameof(IChannelSourceProvider)} interface");
+
+            ChannelSourceProvider = channelSourceProvider;
+        }
+
+        public IChannelSourceProvider CreateSourceProvider()
+        {
+            var instance = Activator.CreateInstance(ChannelSourceProvider) as IChannelSourceProvider;
+
+            if (instance == null)
+                throw new NullReferenceException($"Cannot create instance of {ChannelSourceProvider.FullName ?? ChannelSourceProvider.Name}");
+
+            return instance;
+
         }
     }
 }

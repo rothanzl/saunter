@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Saunter.AsyncApiSchema.v2;
 using Saunter.Generation;
+using Saunter.Generation.PrototypeGeneration;
 using Saunter.Serialization;
 
 namespace Saunter
@@ -21,9 +22,13 @@ namespace Saunter
 
             services.TryAddTransient<IAsyncApiDocumentProvider, AsyncApiDocumentProvider>();
             services.TryAddTransient<IDocumentGenerator, DocumentGenerator>();
+            services.TryAddTransient<IChannelsGenerator, ChannelsGenerator>();
             services.TryAddTransient<IAsyncApiDocumentSerializer, NewtonsoftAsyncApiDocumentSerializer>();
 
-            if (setupAction != null) services.Configure(setupAction);
+            if (setupAction != null)
+            {
+                services.Configure(setupAction);
+            }
 
             return services;
         }

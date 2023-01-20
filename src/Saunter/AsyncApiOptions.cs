@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NJsonSchema;
 using NJsonSchema.Generation;
 using Saunter.AsyncApiSchema.v2;
 using Saunter.Generation.Filters;
+using Saunter.Generation.PrototypeGeneration;
 using Saunter.Generation.SchemaGeneration;
 
 namespace Saunter
 {
     public class AsyncApiOptions
     {
+        
         private readonly List<Type> _documentFilters = new List<Type>();
         private readonly List<Type> _channelItemFilters = new List<Type>();
         private readonly List<Type> _operationFilters = new List<Type>();
-
+        
 
         /// <summary>
         /// The base asyncapi schema. This will be augmented with other information auto-discovered
@@ -79,10 +82,10 @@ namespace Saunter
         public ConcurrentDictionary<string, AsyncApiDocument> NamedApis { get; set; } =
             new ConcurrentDictionary<string, AsyncApiDocument>();
 
-        /// <summary>
-        /// Settings related to the JSON Schema generation.
-        /// </summary>
-        public AsyncApiSchemaOptions SchemaOptions { get; set; } = new AsyncApiSchemaOptions();
+        // /// <summary>
+        // /// Settings related to the JSON Schema generation.
+        // /// </summary>
+        // public AsyncApiSchemaOptions SchemaOptions { get; set; } = new AsyncApiSchemaOptions();
     }
 
     public class AsyncApiSchemaOptions : JsonSchemaGeneratorSettings

@@ -13,13 +13,15 @@ namespace Saunter
         private readonly IAsyncApiDocumentProvider _asyncApiDocumentProvider;
         private readonly IAsyncApiDocumentSerializer _asyncApiDocumentSerializer;
         private readonly AsyncApiOptions _options;
+        private readonly AsyncApiSchemaOptions _schemaOptions;
 
-        public AsyncApiMiddleware(RequestDelegate next, IOptions<AsyncApiOptions> options, IAsyncApiDocumentProvider asyncApiDocumentProvider, IAsyncApiDocumentSerializer asyncApiDocumentSerializer)
+        public AsyncApiMiddleware(RequestDelegate next, IOptions<AsyncApiOptions> options, IOptions<AsyncApiSchemaOptions> schemaOptions, IAsyncApiDocumentProvider asyncApiDocumentProvider, IAsyncApiDocumentSerializer asyncApiDocumentSerializer)
         {
             _next = next;
             _asyncApiDocumentProvider = asyncApiDocumentProvider;
             _asyncApiDocumentSerializer = asyncApiDocumentSerializer;
             _options = options.Value;
+            _schemaOptions = schemaOptions.Value;
         }
 
         public async Task Invoke(HttpContext context)
@@ -37,7 +39,7 @@ namespace Saunter
                 return;
             }
 
-            var asyncApiSchema = _asyncApiDocumentProvider.GetDocument(_options, prototype);
+            var asyncApiSchema = _asyncApiDocumentProvider.GetDocument(_options, _schemaOptions, prototype);
 
             await RespondWithAsyncApiSchemaJson(context.Response, asyncApiSchema, _asyncApiDocumentSerializer, _options);
         }
