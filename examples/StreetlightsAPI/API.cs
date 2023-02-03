@@ -1,115 +1,95 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Saunter.Attributes;
+using Saunter.AsyncApiSchema.v2;
+using Saunter.Generation.SchemaGeneration;
 
 namespace StreetlightsAPI
 {
-    public class Streetlight
+    public class KafkaApi
     {
-        /// <summary>
-        /// Id of the streetlight.
-        /// </summary>
-        public int Id { get; set; }
-        
-        /// <summary>
-        /// Lat-Long coordinates of the streetlight.
-        /// </summary>
-        public double[] Position { get; set; }
-
-        /// <summary>
-        /// History of light intensity measurements
-        /// </summary>
-        public List<KeyValuePair<DateTime, int>> LightIntensity { get; set; }
+        public const string Title = "Inventory Async API";
+        public const string Version = "1.0.0";
+        public const string Description = "The  asynchronous API";
     }
 
-    public class LightMeasuredEvent
+    public class KafkaServer
     {
-        /// <summary>
-        /// Id of the streetlight.
-        /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Light intensity measured in lumens.
-        /// </summary>
-        public int Lumens { get; set; }
-
-        /// <summary>
-        /// Light intensity measured in lumens.
-        /// </summary>
-        public DateTime SentAt { get; set; }
+        public const string Name = "Kafka";
+        public const string Url = "tbd.url.to.kafka.cluster";
+        public const string ProtocolName = "kafka-secure";
     }
 
-    [AsyncApi]
-    [ApiController]
-    [Route("")]
-    public class StreetlightsController
+    public class InventoryApi
     {
-        private const string PublishLightMeasuredTopic = "publish/light/measured";
-
-
-        // Simulate a database of streetlights
-        private static int StreetlightSeq = 2;
-        private static readonly List<Streetlight> StreetlightDatabase = new List<Streetlight>
-        {
-            new Streetlight { Id = 1, Position = new [] { -36.320320, 175.485986 }, LightIntensity = new() },
-        };
+        public const string Description = "The Inventory asynchronous API allows you to handle inventory";
         
-        private readonly IStreetlightMessageBus _streetlightMessageBus;
-        private readonly ILogger _logger;
+        public const string Tag = "Inventory";
+        public const string ExternalDocs = "https://example.com/";
+        public const string ExternalDocsDescription = "TBD";
+        
+        
+    }
 
-        public StreetlightsController(IStreetlightMessageBus streetlightMessageBus, ILoggerFactory loggerFactory)
+    public class RequestTopic
+    {
+        public const string Name = "request.topic.name";
+        public const string Description = "Request topic";
+
+        public class PublishOperation
         {
-            _streetlightMessageBus = streetlightMessageBus;
-            _logger = loggerFactory.CreateLogger<StreetlightsController>();
+            public const string Id = "Requests";
+            public const string Summary = "Operation summary";
+            public const string Description = "Operation description";
         }
         
-        /// <summary>
-        /// Get all streetlights
-        /// </summary>
-        [HttpGet]
-        [Route("api/streetlights")]
-        public IEnumerable<Streetlight> Get() => StreetlightDatabase;
+        
+    }
 
-        /// <summary>
-        /// Add a new streetlight
-        /// </summary>
-        [HttpPost]
-        [Route("api/streetlights")]
-        public Streetlight Add([FromBody] Streetlight streetlight)
+    public class NewInventoryRequest
+    {
+        public const string Id = nameof(NewInventoryRequest);
+        public const string Name = "New Inventory request";
+
+        public const string Title = "the title";
+        public const string Summary = "the summary";
+        public const string Description = "the description";
+        
+        
+        public string Property1 { get; set; }
+        public string Property2 { get; set; }
+        
+    }
+
+    public record KafkaMessageHeader(string Version);
+    
+    
+    public class NewInventoryRequestExample : IExamplesProvider
+    {
+        public MessageExample[] GetExamples()
         {
-            streetlight.Id = StreetlightSeq++;
-            StreetlightDatabase.Add(streetlight);
-            return streetlight;
-        }
-
-        /// <summary>
-        /// Inform about environmental lighting conditions for a particular streetlight.
-        /// </summary>
-        [Channel(PublishLightMeasuredTopic, Servers = new []{"webapi"})]
-        [PublishOperation(typeof(LightMeasuredEvent))]
-        [HttpPost]
-        [Route(PublishLightMeasuredTopic)]
-        public void MeasureLight([FromBody] LightMeasuredEvent lightMeasuredEvent)
-        {
-            lightMeasuredEvent.SentAt = DateTime.Now;
-
-            var payload = JsonSerializer.Serialize(lightMeasuredEvent);
-
-            _logger.LogInformation("Received message on {Topic} with payload {Payload} ", PublishLightMeasuredTopic, payload);
-
-            var streetlight = StreetlightDatabase.SingleOrDefault(s => s.Id == lightMeasuredEvent.Id);
-            if (streetlight != null)
+            return new MessageExample[]
             {
-                streetlight.LightIntensity.Add(new(lightMeasuredEvent.SentAt, lightMeasuredEvent.Lumens));
-
-                // Re-publish messages we receive
-                _streetlightMessageBus.PublishLightMeasurement(lightMeasuredEvent);
-            }
+                new()
+                {
+                    Name = "this is name",
+                    Summary = "this is summary",
+                    Payload = new NewInventoryRequest
+                    {
+                        Property1 = "test string #1",
+                        Property2 = "test string #2",
+                    },
+                    Headers = new KafkaMessageHeader("x.y.z")
+                },
+                new()
+                {
+                    Name = "the second example",
+                    Summary = "summary of the second example",
+                    Payload = new NewInventoryRequest()
+                    {
+                        Property1 = "111",
+                        Property2 = "222"
+                    },
+                    Headers = new KafkaMessageHeader("1.2.3")
+                }
+            };
         }
     }
 }

@@ -27,19 +27,19 @@ public class ChannelsGenerator : IChannelsGenerator
         
         foreach (ChannelRequest channelRequest in req.Channels)
         {
-            var ch = GenerateChannel(channelRequest, schemaResolver);
+            var ch = GenerateChannel(channelRequest, schemaResolver, asyncApiDocument.Tags);
             asyncApiDocument.Channels[ch.Item1] = ch.Item2;
         }
     }
 
-    private (string, ChannelItem) GenerateChannel(ChannelRequest ch, AsyncApiSchemaResolver schemaResolver)
+    private (string, ChannelItem) GenerateChannel(ChannelRequest ch, AsyncApiSchemaResolver schemaResolver, ISet<Tag> tags)
     {
         var channelItem = new ChannelItem()
         {
             Description = ch.Description,
             Parameters = GenerateChannelParameters(ch.Parameters, schemaResolver),
-            Publish = GenerateOperation(ch.Publish, schemaResolver),
-            Subscribe = GenerateOperation(ch.Subscribe, schemaResolver),
+            Publish = GenerateOperation(ch.Publish, schemaResolver, tags),
+            Subscribe = GenerateOperation(ch.Subscribe, schemaResolver, tags),
             Bindings = ch.BindingsRef != null ? new ChannelBindingsReference(ch.BindingsRef) : null,
             Servers = ch.ServerNames.ToList(),
         };
@@ -47,7 +47,8 @@ public class ChannelsGenerator : IChannelsGenerator
         return (ch.Name, channelItem);
     }
 
-    private IDictionary<string, IParameter> GenerateChannelParameters(IEnumerable<ChannelParameterRequest> prms, AsyncApiSchemaResolver schemaResolver)
+    private IDictionary<string, IParameter> GenerateChannelParameters(IEnumerable<ChannelParameterRequest> prms, 
+        AsyncApiSchemaResolver schemaResolver)
     {
         Dictionary<string, IParameter> result = new();
         foreach (ChannelParameterRequest prm in prms)
@@ -66,7 +67,7 @@ public class ChannelsGenerator : IChannelsGenerator
         return result;
     }
 
-    private Operation GenerateOperation(OperationRequest? op, AsyncApiSchemaResolver schemaResolver)
+    private Operation GenerateOperation(OperationRequest? op, AsyncApiSchemaResolver schemaResolver, ISet<Tag> tags)
     {
         if (op is null)
             return null;
@@ -76,18 +77,18 @@ public class ChannelsGenerator : IChannelsGenerator
             OperationId = op.Id,
             Summary = op.Summary,
             Description = op.Description,
-            Message = GenerateMessages(op.Messages, schemaResolver),
+            Message = GenerateMessages(op.Messages, schemaResolver, tags),
             Bindings = op.BindingsRef != null ? new OperationBindingsReference(op.BindingsRef) : null,
-            Tags = new HashSet<Tag>(op.Tags?.Select(x => new Tag(x)) ?? new List<Tag>())
+            Tags =  tags.Where(t => op.Tags.Contains(t.Name)).ToHashSet()
         };
     }
 
-    private Messages GenerateMessages(IEnumerable<MessageRequest> messages, AsyncApiSchemaResolver schemaResolver)
+    private Messages GenerateMessages(IEnumerable<MessageRequest> messages, AsyncApiSchemaResolver schemaResolver, ISet<Tag> tags)
     {
         List<IMessage> msgs = new();
         foreach (MessageRequest messageRequest in messages)
         {
-            msgs.Add(GenerateMessage(messageRequest, schemaResolver));
+            msgs.Add(GenerateMessage(messageRequest, schemaResolver, tags));
         }
 
         return new Messages()
@@ -96,7 +97,7 @@ public class ChannelsGenerator : IChannelsGenerator
         };
     }
 
-    private IMessage GenerateMessage(MessageRequest msg, AsyncApiSchemaResolver schemaResolver)
+    private IMessage GenerateMessage(MessageRequest msg, AsyncApiSchemaResolver schemaResolver, ISet<Tag> tags)
     {
         var message = new Message()
         {
@@ -112,7 +113,7 @@ public class ChannelsGenerator : IChannelsGenerator
             Bindings = msg.BindingsRef != null
                 ? new MessageBindingsReference(msg.BindingsRef)
                 : null,
-            Tags = new HashSet<Tag>(msg.Tags?.Select(x => new Tag(x)) ?? new List<Tag>())
+            Tags = msg.Tags is null ? new HashSet<Tag>() : tags.Where(t => msg.Tags.Contains(t.Name)).ToHashSet()
         };
         
         message.Name = msg.Name ?? message.Payload.ActualSchema.Id;

@@ -42,32 +42,8 @@ namespace StreetlightsAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add Saunter to the application services. 
-            services.AddAsyncApiSchemaGeneration(options =>
-            {
-                options.AssemblyMarkerTypes = new[] { typeof(StreetlightMessageBus) };
+            services.AddAsyncApiInternal();
 
-                options.Middleware.UiTitle = "Streetlights API";
-
-                options.AsyncApi = new AsyncApiDocument
-                {
-                    Info = new Info("Streetlights API", "1.0.0")
-                    {
-                        Description = "The Smartylighting Streetlights API allows you to remotely manage the city lights.",
-                        License = new License("Apache 2.0")
-                        {
-                            Url = "https://www.apache.org/licenses/LICENSE-2.0"
-                        }
-                    },
-                    Servers =
-                    {
-                        ["mosquitto"] = new Server("test.mosquitto.org", "mqtt"),
-                        ["webapi"] = new Server("localhost:5000", "http"),
-                    },
-                };
-            });
-
-            services.AddScoped<IStreetlightMessageBus, StreetlightMessageBus>();
             services.AddControllers();
         }
 
@@ -81,8 +57,7 @@ namespace StreetlightsAPI
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapAsyncApiDocuments();
-                endpoints.MapAsyncApiUi();
+                endpoints.MapAsyncApiEndpoints();
 
                 endpoints.MapControllers();
             });
