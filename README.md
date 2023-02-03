@@ -21,7 +21,7 @@ See [examples/StreetlightsAPI](https://github.com/tehmantra/saunter/blob/main/ex
 1. Install the Saunter package
 
     ```
-    dotnet add package Saunter
+    dotnet add package Rothanzl.SaunterFork
     ```
 
 2. In the `ConfigureServices` method of `Startup.cs`, configure Saunter.
@@ -54,15 +54,11 @@ See [examples/StreetlightsAPI](https://github.com/tehmantra/saunter/blob/main/ex
     });
     ```
 
-3. Add attributes to your classes which publish or subscribe to messages.
+3. TODO
 
     ```csharp
-    [AsyncApi] // Tells Saunter to scan this class.
-    public class StreetlightMessageBus : IStreetlightMessageBus
-    {
-        [Channel("publish/light/measured")] // Creates a Channel
-        [PublishOperation(typeof(LightMeasuredEvent), Summary = "Inform about environmental lighting conditions for a particular streetlight.")] // A simple Publish operation.
-        public void PublishLightMeasuredEvent(Streetlight streetlight, int lumens) {}
+    
+   
     ```
 
 4. Add saunter middleware to host the AsyncApi json document. In the `Configure` method of `Startup.cs`:
