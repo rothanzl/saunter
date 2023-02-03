@@ -79,8 +79,22 @@ public class ChannelsGenerator : IChannelsGenerator
             Description = op.Description,
             Message = GenerateMessages(op.Messages, schemaResolver, tags),
             Bindings = op.BindingsRef != null ? new OperationBindingsReference(op.BindingsRef) : null,
-            Tags =  tags.Where(t => op.Tags.Contains(t.Name)).ToHashSet()
+            Tags = SubSelect(tags, op.Tags),
         };
+    }
+
+    private ISet<Tag> SubSelect(ISet<Tag> tags, string[] select)
+    {
+        if (select is null || select.Length == 0 || tags is null || tags.Count == 0)
+            return new HashSet<Tag>();
+
+        var result = tags
+            .Where(t => select.Contains(t.Name))
+            .ToArray();
+        
+        return result.Any() 
+            ? new HashSet<Tag>(result) 
+            : new HashSet<Tag>();
     }
 
     private Messages GenerateMessages(IEnumerable<MessageRequest> messages, AsyncApiSchemaResolver schemaResolver, ISet<Tag> tags)
@@ -113,7 +127,7 @@ public class ChannelsGenerator : IChannelsGenerator
             Bindings = msg.BindingsRef != null
                 ? new MessageBindingsReference(msg.BindingsRef)
                 : null,
-            Tags = msg.Tags is null ? new HashSet<Tag>() : tags.Where(t => msg.Tags.Contains(t.Name)).ToHashSet()
+            Tags = SubSelect(tags, msg.Tags)
         };
         
         message.Name = msg.Name ?? message.Payload.ActualSchema.Id;
