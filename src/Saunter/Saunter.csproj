@@ -5,7 +5,7 @@
     <IsPackable>true</IsPackable>
     <PackageId>Rothanzl.SaunterFork</PackageId>
     <Title>Rothanzl.SaunterFork</Title>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Authors>tehmantra,Rothanzl</Authors>
@@ -54,12 +54,6 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\Saunter.UI\package.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never">
-      <Link>UI\package.json</Link>
-    </None>
   </ItemGroup>
   
 </Project>
