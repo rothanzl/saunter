@@ -24,8 +24,14 @@ namespace StreetlightsAPI
         public const string Tag = "Inventory";
         public const string ExternalDocs = "https://example.com/";
         public const string ExternalDocsDescription = "TBD";
+    }
+    public class InventoryApi2
+    {
+        public const string Description = "The Inventory asynchronous API allows you to handle inventory";
         
-        
+        public const string Tag = "Inventory2";
+        public const string ExternalDocs = "https://example.com/";
+        public const string ExternalDocsDescription = "TBD";
     }
 
     public class RequestTopic
@@ -39,18 +45,27 @@ namespace StreetlightsAPI
             public const string Summary = "Operation summary";
             public const string Description = "Operation description";
         }
-        
-        
+    }
+    public class RequestTopic2
+    {
+        public const string Name = "request2.topic.name";
+        public const string Description = "Request2 topic";
+
+        public class PublishOperation
+        {
+            public const string Id = "Requests2";
+            public const string Summary = "Operation summary";
+            public const string Description = "Operation description";
+        }
     }
 
     public class NewInventoryRequest
     {
         public const string Id = nameof(NewInventoryRequest);
-        public const string Name = "New Inventory request";
 
-        public const string Title = "the title";
-        public const string Summary = "the summary";
-        public const string Description = "the description";
+        public const string Title = "message title";
+        public const string Summary = "message summary";
+        public const string Description = "message description";
         
         
         public string Property1 { get; set; }

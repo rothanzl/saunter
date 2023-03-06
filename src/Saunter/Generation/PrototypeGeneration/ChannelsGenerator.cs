@@ -116,6 +116,7 @@ public class ChannelsGenerator : IChannelsGenerator
         var message = new Message()
         {
             MessageId = msg.Id,
+            Name = msg.Id,
             Payload = _generator.Generate(msg.PayloadType, schemaResolver),
             Headers = msg.HeadersType != null
                 ? _generator.Generate(msg.HeadersType, schemaResolver)
@@ -129,9 +130,7 @@ public class ChannelsGenerator : IChannelsGenerator
                 : null,
             Tags = SubSelect(tags, msg.Tags)
         };
-        
-        message.Name = msg.Name ?? message.Payload.ActualSchema.Id;
-        
+
         return schemaResolver.GetMessageOrReference(message);
     }
 }
